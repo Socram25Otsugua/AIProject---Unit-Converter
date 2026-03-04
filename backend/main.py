@@ -1,6 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from agent import run_agent
 
 app = FastAPI(title="Unit Converter API")
 
@@ -28,5 +29,8 @@ def root():
 
 @app.post("/convert", response_model=ConvertResponse)
 def convert(request: ConvertRequest):
-    # TODO: wire up agent in next commit
-    return ConvertResponse(result=f"Received: {request.query} (agent not connected yet)")
+    try:
+        result = run_agent(request.query)
+        return ConvertResponse(result=result)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
